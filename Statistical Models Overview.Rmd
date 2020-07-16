@@ -1,0 +1,434 @@
+---
+title: "Statistical Models"
+author: "David Tofan"
+date: "5/19/2020"
+output:
+  html_document:
+    theme: readable
+    highlight: tango
+    toc: true
+    toc_depth: 5
+    toc_float: true
+    toc_collapsed: true
+    number_sections: false
+---
+
+# Data Exploration
+
+## Univariate (one variable)
+
+* A single response or outcome variable (y) to describe data or find patterns.
+
+<font size="5">Types of Analysis</font>
+
+* Central tendency measures (mean, median, and mode).
+* Dispersion or spread of data (range, minimum, maximum, quantiles, quartiles, (box plot) variance, and standard deviation).
+* Frequency distribution tables (histograms, pie charts, frequency polygon, and bar charts).
+
+
+* Numerical variables can be transformed into categorical counterparts by a process called <b>binning</b> or discretization (e.g. bin values for Age into categories such as 20-39, 40-59, and 60-79).
+
+* Categorical variable can be transformed into its numerical counterpart by a process called <b>encoding</b> (e.g. treat male or female for gender as 1 or 0).
+
++ Binary Encoding (1 or 0)
+
++ Target-based Encoding (numerization of categorical variables via target)
+
+#### <b>Categorical/Discrete Variables</b>
+
+Two types of discrete variables:
+
+* Nominal (no intrinsic ordering to the categories, e.g. Gender)
+
+* Ordinal (clear ordering, e.g. Education Level (high school, BS, MS, PhD))
+
+A frequency table is a way of counting how often each category of the variable in question occurs. It may be enhanced by the addition of percentages that fall into each category.
+
+```{r}
+# Example
+Weather <- c('Rainy','Rainy','Overcast','Sunny','Sunny','Sunny','Overcast','Rainy','Rainy','Sunny','Rainy','Overcast','Overcast','Sunny')
+
+Weather
+```
+
+#### <b>Numerical/Continuous Variables</b>
+
+* Interval (values whose differences are interpretable, but it does not have a true zero, can be added and subtracted but cannot be meaningfully multiplied or divided, e.g. Temperature)
+
+* Ratio (values with a true zero and can be added, subtracted, multiplied or divided, e.g., Weight)
+
+```{r}
+# Example
+Temperature <- c(25, 14, 29, 20, 25, 29, 21, 21, 19, 18, 19, 15, 27, 19)
+
+Temperature
+```
+
+## Bivariate (two variables)
+
+* to find out a comparison, possible association, causes, or relationship between the two variables.
+
+<font size="5">Types of Analysis</font>
+
+#### <b>Numerical & Numerical</b>
+
+* Scatter Plot (relationship between two numerical variables)
+
+```{r}
+# Example
+head(mtcars) # Dataset
+
+# Visualize
+plot(wt, # Variable: Weight (1000 lbs)
+     mpg, # Variable: Miles/(US) gallon
+     type = "p", # Type of plot
+     main = "Scatterplot Example", # Plot title
+     #col.main = "red", # Title color
+     xlab = "Car Weight ", # X label
+     ylab = "Miles Per Gallon ", # Y label
+     font = 2, # Font (1=plain, 2=bold, 3=italic, 4=bold italic, 5=symbol)
+     #family = "serif", # Font family
+     pch = 22, # Symbols
+     #cex = 2, # Scale size
+     col = "blue", # Symbol color
+     #fg = "red", # Foreground color
+     #bg = "green" # Symbol background color
+)
+# The variables seem to have a negative correlation
+
+# Correlation coefficient 
+#cor(mtcars$wt, mtcars$mpg)
+```
+
+* Linear Correlation (-1 to 1) (strength of a linear relationship between two numerical variables)
+
+```{r}
+# Example
+head(pressure) # Dataset
+
+# Correlation coefficient 
+cor(pressure$temperature, # Variable 1
+    pressure$pressure,# Variable 2
+    method = "pearson") # spearman = ordinal variables
+```
+
+#### <b>Categorical & Categorical</b>
+
+* Stacked Column Chart (percentage)
+
+```{r}
+# Example
+head(Arthritis) # Dataset
+
+# Frequency in percentage
+counts <- prop.table((table(Arthritis$Treatment, Arthritis$Sex)))
+
+# Visualize
+barplot(counts, 
+        main = "Distribution of Treatment by Sex", # Title
+        xlab = "Amount", # X label
+        col = c("darkblue","red"), # Colors
+        horiz = TRUE, # Horizontal
+        legend = rownames(counts), # Legend
+        #beside = TRUE # Juxtaposed bars
+)
+```
+
+* Combination Chart (distribution and percentage)
+
+```{r}
+
+```
+
+* Chi-square Test (difference between the expected frequencies and the observed frequencies
+
++ 0 = complete dependence
+
++ 1 = completely independent
+
+#### <b>Numerical & Categorical</b>
+
+* Line Chart with Error Bars (average)
+
+* Combination Chart (distribution and percentage)
+
+* Z-test and t-test
++ Comparing the averages of a numerical variable for two categories of a categorical variable.
+
+* Analysis of Variance (ANOVA)
++ Comparing the averages of a numerical variable for more than two categories of a categorical variable.
+
+## Multivariate
+
+* The distribution of two or more response variables (y1, y2, ...) jointly.
+
+<font size="5">Types of Analysis</font>
+
+* Regression analysis
+
+* Path analysis
+
+* Factor analysis
+
+* Multivariate analysis of variance (MANOVA)
+
+## Missing Values
+
+* Meaning: perhaps the data was not available, not found, not applicable, the event did not happen, or it was forgotten or missed.
+
+Missing Values Replacement Policies:
+
+* Ignore the records with missing values.
+
+* Replace them with a global constant (e.g., “?”).
+
+* Fill in missing values manually based on your domain knowledge.
+
+* Replace them with the variable mean (if numerical) or the most frequent value (if categorical).
+
+* Use modeling techniques such as nearest neighbors, Bayes’ rule, decision tree, or EM algorithm.
+
+# Statistical Models
+
+## <b>Predictive Modeling</b>
+
+### <b>Classification</b>
+
+* Predicting the value of a <b>categorical</b> variable
+
+#### Frequency Table
+
+##### ZeroR
+
+Construct a frequency table for the target and select its most frequent value, taking the majority class of the target attribute.
+
+* Used to determining a baseline performance for other classification methods. (No predictor).
+
+Data Source: [r-bloogers](#r-bloogers)
+
+```{r}
+# Example
+library(OneR) # install.packages(OneR)
+ZeroR <- function(x, ...) {
+  output <- OneR(cbind(dummy = TRUE, x[ncol(x)]), ...)
+  class(output) <- c("ZeroR", "OneR")
+  output
+}
+predict.ZeroR <- function(object, newdata, ...) {
+  class(object) <- "OneR"
+  predict(object, cbind(dummy = TRUE, newdata[ncol(newdata)]), ...)
+}
+# Load data as DataFrame
+data <- read.table("/Users/davidtofan/Downloads/german.data", header = FALSE)
+data <- data.frame(data[ , 1:20], creditrisk = factor(data[ , 21]))
+# Count frequency
+table(data$creditrisk)
+
+set.seed(805) # Reproducibility
+# Data Training & Test sets
+random <- sample(1:nrow(data), 0.6 * nrow(data))
+data_train <- data[random, ]
+data_test <- data[-random, ]
+
+# ZeroR classifier
+model <- ZeroR(data_train)
+summary(model)
+# Visualize
+#plot(model)
+
+# Prediction performance (Confusion Matrix)
+prediction <- predict(model, data_test)
+eval_model(prediction, data_test) # 70% accuracy
+
+# Confusion Matrix
+library(caret)
+truth <- data_test$creditrisk
+pred <- prediction
+confusionMatrix(pred, truth)
+```
+
+##### OneR (One Rule)
+
+Generates one rule for each predictor in the data, then selects the rule with the smallest total error as its "one rule".
+
+* Finding the best predictor with the smallest total error. (Try to find the single best predictor).
+
+```{r}
+# Example
+# Create DataFrame
+Outlook <- c('Rainy','Rainy','Overcast','Sunny','Sunny','Sunny','Overcast','Rainy','Rainy','Sunny','Rainy','Overcast','Overcast','Sunny')
+Temperature <- c('Hot','Hot','Hot','Mild','Cool','Cool','Cool','Mild','Cool','Mild','Mild','Mild','Hot','Mild')
+Humidity <- c('High','High','High','High','Normal','Normal','Normal','High','Normal','Normal','Normal','High','Normal','High')
+Windy <- c('FALSE','TRUE','FALSE','FALSE','FALSE','TRUE','TRUE','FALSE','FALSE','FALSE','TRUE','TRUE','FALSE','TRUE')
+Play_golf <- c('No','No','Yes','Yes','Yes','No','Yes','No','Yes','Yes','Yes','Yes','Yes','No')
+weather_nominal_data <- data.frame(Outlook, Temperature, Humidity, Windy, Play_golf)
+
+# Count frequency
+table(weather_nominal_data$Play_golf)
+
+
+d <- confusionMatrix(weather_nominal_data$Play_golf, weather_nominal_data$Play_golf)
+str(d)
+overall <- d$overall
+overall.accuracy <- overall['Accuracy']
+
+truth <- weather_nominal_data$Play_golf
+pred <- as.factor(c('Yes','No','Yes','Yes','Yes','No','Yes','No','Yes','Yes','Yes','Yes','Yes','No'))
+confusionMatrix(pred, truth)
+
+set.seed(805) # Reproducibility
+# Data Training & Test sets
+random <- sample(1:nrow(data), 0.6 * nrow(data))
+data_train <- data[random, ]
+data_test <- data[-random, ]
+
+# OneR classifier
+library(OneR)
+data <- optbin(data_train)
+model <- OneR(data, verbose = TRUE)
+summary(model)
+# Visualize
+#plot(model)
+
+# Prediction performance (Confusion Matrix)
+prediction <- predict(model, data_test)
+eval_model(prediction, data_test) # 70% accuracy
+```
+
+##### Naive Bayesian
+
+* Includes all predictors using Bayes' rule and the independence assumptions between predictors.
+
+```{r}
+# Example
+# Create DataFrame
+Outlook <- c('Rainy','Rainy','Overcast','Sunny','Sunny','Sunny','Overcast','Rainy','Rainy','Sunny','Rainy','Overcast','Overcast','Sunny')
+Temperature <- c('Hot','Hot','Hot','Mild','Cool','Cool','Cool','Mild','Cool','Mild','Mild','Mild','Hot','Mild')
+Humidity <- c('High','High','High','High','Normal','Normal','Normal','High','Normal','Normal','Normal','High','Normal','High')
+Windy <- c('FALSE','TRUE','FALSE','FALSE','FALSE','TRUE','TRUE','FALSE','FALSE','FALSE','TRUE','TRUE','FALSE','TRUE')
+Play_golf <- c('No','No','Yes','Yes','Yes','No','Yes','No','Yes','Yes','Yes','Yes','Yes','No')
+weather_nominal_data <- data.frame(Outlook, Temperature, Humidity, Windy, Play_golf)
+
+library(caret)
+set.seed(805) # Reproducibility
+trainIndex = createDataPartition(weather_nominal_data$Play_golf, p = 0.7)$Resample1
+train = weather_nominal_data[trainIndex, ]
+test = weather_nominal_data[-trainIndex, ]
+
+## check the balance
+table(weather_nominal_data$Play_golf)
+
+# naiveBayes function
+library(e1071)
+NBclassfier = naiveBayes(Play_golf ~ ., data = train)
+print(NBclassfier)
+```
+
+
+#### Covariance Matrix
+#### Similarity Functions
+#### Others
+
+
+##### Reviewing Models
+
+<b>For Loop</b>
+
+* Review models multiple times to review model precision
+
+```{r eval=FALSE}
+## REPLACE 'DataFrame' with the actual DataFrame
+# Empty lists
+datalist <- list()
+datalistAIC <- list()
+column_list <- list()
+# For Loop
+for (i in 1:3){
+  # Get random sample from data
+  rand <- sample(x = 1:nrow(DataFrame), size = nrow(DataFrame)*0.80, replace = FALSE)
+  moort1 <- DataFrame[rand,]
+  # GLM Model (interchangeable)
+  model1 <- glm(response ~ ., family = binomial(link='logit'), data = moort1)
+  # Variable coefficients
+  newdf <- as.data.frame(model1$coefficients)
+  # Create new column names for each iteration
+  new_name <- paste("model1_", i, sep = '')
+  colnames(newdf)[1] <- new_name
+  # Save column names in list
+  column_list[[i]] <- new_name
+  # Append list to add new column
+  datalist[[i]] <- newdf
+  # Extract AIC from model
+  AIC <- as.data.frame(model1$aic)
+  # Name Index
+  rownames(AIC) <- 'AIC'
+  # Append list to add AIC row
+  datalistAIC[[i]] <- AIC
+}
+# Combine list elements as DataFrame columns
+df <- do.call(cbind, datalist)
+# Prepare last AIC row
+datalistAICdf <- as.data.frame(datalistAIC)
+colnames(datalistAICdf) <- column_list
+# Combine DataFrame with last AIC row
+df <- rbind(df, datalistAICdf)
+# View DataFrame
+df
+```
+
+### <b>Regression</b>
+
+* Predicting the value of a <b>numerical</b> variable
+
+
+## <b>Descriptive Modeling</b>
+
+* Clustering = assignment of observations into clusters so that observations in the same cluster are similar
+
+* Association = find interesting associations amongst observations
+
+## Regression Analysis
+
+* A set of statistical processes for estimating the relationships between a dependent variable (often called the 'outcome variable', or 'target') and one or more independent variables (often called 'predictors', 'covariates', or 'features').
+
+<b>Usage:</b>
+
+* prediction,
+
+* forecasting,
+
+* to infer causal relationships between the independent and dependent variables.
+
+
+
+### Linear Regression
+
+### Nonlinear regression
+
+
+
+## Decision Tree
+
+https://www.analyticsvidhya.com/blog/2020/05/decision-tree-vs-random-forest-algorithm/
+
+## Generalized Linear Models (GLM)
+
+
+
+
+
+# Bibliography
+
+Sources used to add examples and/or to extract information:
+
+* Data Mining Map https://www.saedsayad.com/data_mining_map.htm
+
+* <a name="r-bloogers">R-Bloogers</a> https://www.r-bloggers.com/zeror-the-simplest-possible-classifier-or-why-high-accuracy-can-be-misleading/
+
+* Correlation (Pearson, Kendall, Spearman) https://www.statisticssolutions.com/correlation-pearson-kendall-spearman/
+
+# Disclaimer
+
+This document is for educational purposes only and is simply a summary and centralization of information gathered and learned regarding Business Analytics and Data Science.
+
+<div class="tocify-extend-page" data-unique="tocify-extend-page" style="height: 0;"></div>
